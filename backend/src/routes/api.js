@@ -8,6 +8,8 @@ const db = require('../db');
 const { streamMealPlan, streamSingleMeal, parseResponse, getStatus, setApiKey } = require('../aiService');
 const { OAuth2Client } = require('google-auth-library');
 
+const JWT_SECRET = JWT_SECRET || 'healthyplate_fallback_secret_2024';
+
 const router = express.Router();
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID || 'dummy');
 
@@ -35,7 +37,7 @@ function auth(req, res, next) {
   const token = req.headers.authorization?.split(' ')[1];
   if (!token) return res.status(401).json({ error: 'Token requis' });
   try {
-    req.user = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = jwt.verify(token, JWT_SECRET);
     next();
   } catch { return res.status(401).json({ error: 'Token invalide' }); }
 }
@@ -52,7 +54,7 @@ router.post('/auth/register', async (req, res) => {
         [name, email, hash]
       );
       const user = result.rows[0];
-      const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '30d' });
+      const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '30d' });
       return res.json({ user, token });
     }
 
@@ -60,7 +62,7 @@ router.post('/auth/register', async (req, res) => {
     if (memUsers.find(u => u.email === email)) return res.status(400).json({ error: 'Email déjà utilisé' });
     const user = { id: memUserId++, name, email, password_hash: hash };
     memUsers.push(user);
-    const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '30d' });
+    const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '30d' });
     res.json({ user: { id: user.id, name: user.name, email: user.email }, token });
   } catch (err) {
     if (err.code === '23505') return res.status(400).json({ error: 'Email déjà utilisé' });
@@ -77,7 +79,7 @@ router.post('/auth/login', async (req, res) => {
       const user = result.rows[0];
       if (!user || !(await bcrypt.compare(password, user.password_hash)))
         return res.status(401).json({ error: 'Email ou mot de passe incorrect' });
-      const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '30d' });
+      const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '30d' });
       return res.json({ user: { id: user.id, name: user.name, email: user.email }, token });
     }
 
@@ -85,7 +87,7 @@ router.post('/auth/login', async (req, res) => {
     const user = memUsers.find(u => u.email === email);
     if (!user || !(await bcrypt.compare(password, user.password_hash)))
       return res.status(401).json({ error: 'Email ou mot de passe incorrect' });
-    const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '30d' });
+    const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '30d' });
     res.json({ user: { id: user.id, name: user.name, email: user.email }, token });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -126,7 +128,7 @@ router.post('/auth/google', async (req, res) => {
         );
         user = result.rows[0];
       }
-      const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '30d' });
+      const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '30d' });
       return res.json({ user: { id: user.id, name: user.name, email: user.email }, token });
     }
 
@@ -136,7 +138,7 @@ router.post('/auth/google', async (req, res) => {
       user = { id: memUserId++, name, email, password_hash: 'google-oauth' };
       memUsers.push(user);
     }
-    const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '30d' });
+    const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '30d' });
     res.json({ user: { id: user.id, name: user.name, email: user.email }, token });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -151,7 +153,7 @@ router.get('/ingredients', async (req, res) => {
     }
 
     const userId = req.headers.authorization ?
-      jwt.verify(req.headers.authorization.split(' ')[1], process.env.JWT_SECRET).id : null;
+      jwt.verify(req.headers.authorization.split(' ')[1], JWT_SECRET).id : null;
 
     const query = await db.query(
       'SELECT i.id, i.name, i.category, i.default_unit as unit, i.image_url, COALESCE(uip.price, i.default_price) as price FROM ingredients i LEFT JOIN user_ingredient_prices uip ON i.id = uip.ingredient_id AND uip.user_id = $1 ORDER BY i.category, i.name',
