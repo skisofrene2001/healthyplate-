@@ -8,7 +8,7 @@ const db = require('../db');
 const { streamMealPlan, streamSingleMeal, parseResponse, getStatus, setApiKey } = require('../aiService');
 const { OAuth2Client } = require('google-auth-library');
 
-const JWT_SECRET = JWT_SECRET || 'healthyplate_fallback_secret_2024';
+const JWT_SECRET = process.env.JWT_SECRET || 'healthyplate_fallback_secret_2024';
 
 const router = express.Router();
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID || 'dummy');
