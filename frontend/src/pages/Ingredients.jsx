@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getIngredients, updateIngredientPrice, addIngredient, updateIngredient, deleteIngredient, isLoggedIn, generateIngredientsAI } from '../api';
+import { getIngredients, updateIngredientPrice, addIngredient, updateIngredient, deleteIngredient, isLoggedIn } from '../api';
 import { getIngredientImage, CATEGORY_EMOJI } from '../utils/foodImages';
 
 export default function Ingredients() {
@@ -13,8 +13,6 @@ export default function Ingredients() {
   const [currentIng, setCurrentIng] = useState({ name: '', category: 'Protéines', unit: 'kg', price: 0, image_url: '' });
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState('');
-  const [aiPrompt, setAiPrompt] = useState('');
-  const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() => { loadIngredients(); }, []);
 
@@ -53,28 +51,6 @@ export default function Ingredients() {
       setMsg('❌ Erreur: ' + err.message);
     }
     setSaving(false);
-  };
-
-  const handleAiGenerate = async () => {
-    if (!aiPrompt.trim()) return;
-    if (!isLoggedIn()) { setMsg('Connectez-vous pour utiliser l\'IA'); return; }
-    setIsGenerating(true);
-    setMsg('⏳ Génération en cours...');
-    try {
-      const res = await generateIngredientsAI(aiPrompt);
-      if (res.success) {
-        if (res.inserted > 0) {
-          setMsg(`✅ ${res.inserted} ingrédient(s) ajouté(s)${res.skipped > 0 ? ` (${res.skipped} existaient déjà)` : ''}`);
-        } else {
-          setMsg(`⚠️ Tous les ingrédients existent déjà (${res.skipped} doublons ignorés)`);
-        }
-        setAiPrompt('');
-        loadIngredients();
-      }
-    } catch (err) {
-      setMsg('❌ Erreur: ' + err.message);
-    }
-    setIsGenerating(false);
   };
 
   const handleOpenModal = (mode, ing = null) => {
@@ -143,24 +119,6 @@ export default function Ingredients() {
         </div>
         <button className="btn-add-ing" onClick={() => handleOpenModal('add')} style={{padding:'8px 16px',borderRadius:8,background:'var(--g5)',color:'#fff',border:'none',fontWeight:600,cursor:'pointer'}}>
           + Ajouter
-        </button>
-      </div>
-
-      <div style={{display:'flex', gap:8, marginBottom:20}}>
-        <input 
-          type="text" 
-          placeholder="Ex: Ajoute des ingrédients de la cuisine algérienne (Couscous, Frik, Rechta...)" 
-          value={aiPrompt} 
-          onChange={e => setAiPrompt(e.target.value)} 
-          className="search-bar"
-          style={{flex:1, marginBottom:0}}
-        />
-        <button 
-          onClick={handleAiGenerate} 
-          disabled={isGenerating}
-          style={{padding:'0 20px', borderRadius:8, background:'linear-gradient(135deg, var(--g6), var(--g5))', color:'#fff', border:'none', fontWeight:700, cursor: isGenerating ? 'not-allowed' : 'pointer'}}
-        >
-          {isGenerating ? '⏳...' : '✨ IA: Générer'}
         </button>
       </div>
 
