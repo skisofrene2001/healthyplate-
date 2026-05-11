@@ -2,7 +2,7 @@ const API_BASE = '/api';
 
 function getHeaders() {
   const token = localStorage.getItem('hp_token');
-  const headers = {};
+  const headers = { 'Content-Type': 'application/json' };
   if (token) headers['Authorization'] = `Bearer ${token}`;
   return headers;
 }
