@@ -34,6 +34,16 @@ Initialement pensé pour le dinar algérien (DA), ce projet est entièrement per
 - 📱 **Progressive Web App (PWA)** : Installable sur smartphone ou PC comme une app native.
 - 📄 **Export PDF** : Téléchargez votre plan de repas complet.
 
+## 📸 Captures d'écran
+
+<div align="center">
+  <img src="snap/1.png" alt="Page d'accueil" width="250" />
+  <img src="snap/2.png" alt="Génération de plan" width="250" />
+  <img src="snap/3.png" alt="Recette détaillée" width="250" />
+  <img src="snap/4.png" alt="Ingrédients" width="250" />
+  <img src="snap/5.png" alt="Archives" width="250" />
+</div>
+
 ## 🛠️ Technologies
 
 - **Frontend** : React.js (Vite), Vanilla CSS (UI style "Instagram Explore").
