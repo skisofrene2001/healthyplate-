@@ -147,7 +147,7 @@ function buildPrompt({ duration, mealTypes, budgetMax, ingredientPrices, prefere
 Génère un plan de repas SAIN, ÉQUILIBRÉ et TOTALEMENT ORIGINAL. Graine de créativité: #${randomSeed}.
 CONTRAINTES:
 - Durée: ${duration}
-- Types de repas: ${mealTypes.join(', ')}
+- Types de repas: ${(mealTypes || []).join(', ')}
 ${budgetLine}
 ${prefsLine}
 ${fridgeLine}
